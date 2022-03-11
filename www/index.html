@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Main page</title>
+    <script src="lib.js"></script>
+    <style>
+        div {
+            margin:0 auto;
+            width:300px
+        }
+        h1 {
+            text-align: center;
+        }
+        input {
+            margin-bottom:3px;
+            padding:10px;
+            width: 100%;
+            border:1px solid #CCC
+        }
+        button {
+            padding:10px
+        }
+        label {
+            cursor:pointer
+        }
+        #form-switch {
+            display:none
+        }
+        #register-form {
+            display:none
+        }
+        #authentication-form {
+            display:none
+        }
+        #form-switch:checked~#register-form {
+            display:block
+        }
+        #form-switch:checked~#login-form {
+            display:none
+        }
+    </style>
+</head>
+<body>
+<hr/>
+<input type='checkbox' id='form-switch'>
+<div id='login-form' action="">
+    <h1>Вход в систему</h1>
+    <input type="email" id="loginEmail" name="data" class="input" placeholder="Логин" required>
+    <input type="password" id="loginPassword" name="data" class="input" placeholder="Пароль" required>
+    <label id="loginLabel" style="display:none; color: darkred;"><b></b></label>
+    <button id="login" type='submit'>Войти</button>
+    <label for='form-switch'><span>Регистрация</span></label>
+</div>
+<div id='register-form'>
+    <h1>Регистрация</h1>
+    <input type="email" id="email" name="data" class="input"
+           pattern="[-a-zA-Z0-9~!$%^&amp;*_=+}{'?]+(\.[-a-zA-Z0-9~!$%^&amp;*_=+}{'?]+)*@([a-zA-Z0-9_][-a-zA-Z0-9_]*(\.[-a-zA-Z0-9_]+)*\.([cC][oO][mM]))(:[0-9]{1,5})?"
+           maxlength="64" placeholder="Email" required/>
+    <input type="password" id="password" name="data" class="input" placeholder="Пароль" required/>
+    <input type="password" id="checkPassword" name="data" class="input" placeholder="Повторите пароль" required/>
+    <label id="pswError"><b></b></label>
+    <input type="text" id="name" name="data" class="input" placeholder="Имя" required/>
+    <input type="text" id="surname" name="data" class="input" placeholder="Фамилия" required/>
+    <input type="tel" id="mobile" name="data" class="input" pattern="[+7][0-9]{10}" value="+7" placeholder="Телефон" required/>
+    <small>Format: +79165552233</small><br><br>
+    <pre><button id="register" type='submit'>Зарегистрироваться</button><br>   <label id="registrationLabel" style="display:none; color: darkred;"><b></b></label>
+    <label for='form-switch'>
+        Уже зарегистрированы ? Войдите в систему..</label>
+    </pre>
+</div>
+</body>
+<script>
+    var hideAllInputData = function() {
+        let arr = document.getElementsByName('data');
+        for (var i = 0; i < arr.length; i++) {
+            arr[i].value = "";
+            arr[i].style.borderColor = "#CCC";
+        }
+    };
+
+    addEvent("register", "click", function() {
+        document.getElementById("registrationLabel").style.display = "none";
+        let arr = document.getElementsByName('data');
+        for(var i = 0; i < arr.length; i++){
+            if(arr[i].value === "") {
+                arr[i].style.borderColor = "darkred";
+            } else {
+                arr[i].style.borderColor = "#CCC";
+            }
+        }
+        let email = document.getElementById("email").value;
+        let password = document.getElementById("password").value;
+        let checkPassword = document.getElementById("checkPassword").value;
+        let name = document.getElementById("name").value;
+        let surname = document.getElementById("surname").value;
+        let mobile = document.getElementById("mobile").value;
+
+        if (password === checkPassword) {
+            document.getElementById("pswError").style.display = "none";
+            sendRequest({action: "register",
+                email: email,
+                password: password,
+                name: name,
+                surname: surname,
+                mobile: mobile}, function (response) {
+                let data = JSON.parse(JSON.stringify(response));
+                if (data.includes("@")) {
+                    document.getElementById("registrationLabel").style.display = "inherit";
+                    hideAllInputData();
+                    document.getElementById("registrationLabel").innerHTML = "Пользователь зарегистрирован!";
+                } else {
+                    document.getElementById("registrationLabel").style.display = "inherit";
+                    document.getElementById("registrationLabel").innerHTML = data;
+                }
+            });
+        } else {
+            document.getElementById("pswError").style.display = "inherit";
+            document.getElementById("pswError").innerHTML = "Пароли не совпадают!";
+        }
+    });
+
+    addEvent("login", "click", function() {
+        let email = document.getElementById("loginEmail").value;
+        let password = document.getElementById("loginPassword").value;
+        sendRequest({action: "login", email: email, password: password}, function (response) {
+            let data = JSON.parse(JSON.stringify(response));
+            if (data === "OK") {
+                document.getElementById("loginLabel").style.display = "none";
+                document.getElementById("login-form").style.display = "none";
+                hideAllInputData();
+                window.location.href = "./content.html";
+            } else {
+                document.getElementById("loginLabel").style.display = "inherit";
+                document.getElementById("loginLabel").innerHTML = data;
+            }
+        });
+    });
+</script>
+</html>

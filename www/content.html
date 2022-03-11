@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Content</title>
+    <script src="lib.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <script src="external/papaparse.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <style>
+        div {
+            margin:0 auto;
+            width:300px
+        }
+        h1 {
+            text-align: center;
+        }
+        input {
+            margin-bottom:3px;
+            padding:10px;
+            width: 100%;
+            border:1px solid #CCC
+        }
+        button {
+            padding:10px
+        }
+        label {
+            cursor:pointer
+        }
+        a {
+            border: 1px solid blue;
+            padding: 2px;
+            text-decoration: none;
+        }
+        a:hover {
+            border: 1px solid red;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <button id="logout" type='submit'>Выйти</button>
+    </div>
+    <hr/>
+
+    <div id="header"></div>
+    <div class="well">
+        <div class="row">
+            <form class="form-inline">
+                <div class="form-group">
+                    <label for="files">Upload a CSV formatted file:</label>
+                    <input type="file" id="files"  class="form-control" accept=".csv" required />
+                </div>
+                <div class="form-group">
+                    <button type="submit" id="submit-file" class="btn btn-primary">Upload File</button>
+                </div>
+            </form>
+        </div>
+        <div class="row">
+
+        <div class="row" id="parsed_csv_list">
+        </div>
+    </div>
+    </div>
+    <div id="footer"></div>
+    </div>
+
+
+    <div id="dataOptions">
+        <label for="dataOptions">Обработка данных</label>
+        <div class="form-group">
+            <label for="emptyValue">Заполнение пустых значений</label>
+            <select class="form-control" id="emptyValue">
+                <option value="1">удаление</option>
+                <option value="2">заполнение минимальным значением</option>
+                <option value="3">заполнение максимальным значением</option>
+                <option value="4">заполнение средним значением</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="emissions">Обработка выбросов</label>
+            <select class="form-control" id="emissions">
+                <option value="1">удаление</option>
+                <option value="2">логарифмирование</option>
+                <option value="3">заполнение средним значением</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="normalization">Нормализация</label>
+            <select class="form-control" id="normalization">
+                <option value="1">приведение к диапазону с заданным минимум и максимумом</option>
+                <option value="2">приведение к нормальному виду с математическим ожиданием = 0 и дисперсией = 1</option>
+            </select>
+        </div>
+    </div>
+
+    <div id="MLOptions">
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+</body>
+<script>
+    $(document).ready(function(){
+
+        $('#submit-file').on("click",function(e){
+            e.preventDefault();
+            $('#files').parse({
+                config: {
+                    delimiter: "auto",
+                    complete: displayHTMLTable,
+                },
+                before: function(file, inputElem)
+                {
+                    //console.log("Parsing file...", file);
+                },
+                error: function(err, file)
+                {
+                    //console.log("ERROR:", err, file);
+                },
+                complete: function()
+                {
+                    //console.log("Done with all files");
+                }
+            });
+        });
+
+        function displayHTMLTable(results){
+            var table = "<table class='table'>";
+            var data = results.data;
+
+            for(i=0;i<data.length;i++){
+                table+= "<tr>";
+                var row = data[i];
+                var cells = row.join(",").split(",");
+
+                for(j=0;j<cells.length;j++){
+                    table+= "<td>";
+                    table+= cells[j];
+                    table+= "</th>";
+                }
+                table+= "</tr>";
+            }
+            table+= "</table>";
+            $("#parsed_csv_list").html(table);
+        }
+    });
+
+    addEvent("logout", "click", function() {
+        window.location.href = "index.html";
+    });
+</script>
+</html>
